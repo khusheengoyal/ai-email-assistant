@@ -1,0 +1,20 @@
+{
+  "sender_patterns": [
+    "no[-.]?reply",
+    "do[-.]?not[-.]?reply",
+    "notifications?@",
+    "newsletter"
+  ],
+  "blocked_domains": [
+    "mailchimp.com",
+    "sendgrid.net"
+  ],
+  "header_rules": [
+    {"header": "List-Unsubscribe", "condition": "present"},
+    {"header": "Precedence", "condition": "equals", "value": "bulk"}
+  ],
+  "allowlist": {
+    "senders": [],
+    "domains": []
+  }
+}

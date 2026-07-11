@@ -1,0 +1,6 @@
+google-api-python-client
+google-auth-oauthlib
+groq
+python-dotenv
+pypdf
+streamlit

@@ -1,0 +1,20 @@
+# Secrets — never commit
+credentials.json
+client_secret*.json
+token.json
+.env
+
+# Local personal data — never commit
+sender_log.json
+writing_profile.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# OS / editor
+.DS_Store
+.vscode/
