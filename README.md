@@ -93,8 +93,9 @@ Format:
 - `header_rules` — each has a `header` name and a `condition`: `present`
   (header exists and is non-empty), `equals`, or `contains` (the latter two
   need a `value`).
-- `allowlist` — `senders` (substring match against `From`) and `domains`
-  (exact match). Allowlist always overrides every other rule.
+- `allowlist` — `senders` (exact match against the sender's bare email
+  address) and `domains` (exact match). Allowlist always overrides every
+  other rule.
 
 ## Writing-style profile & default tone
 
@@ -126,3 +127,7 @@ Professional").
 - Never sends email automatically or otherwise. Every reply is a draft
   requiring explicit human approval.
 - Not a full email client — triage and drafting only.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
