@@ -106,7 +106,7 @@ div[data-testid="stButton"] > button:hover {{
     border-left: 4px solid var(--cat-color, {ACCENT_END});
     border-radius: 12px;
     padding: 16px 20px;
-    margin-bottom: 14px;
+    margin-bottom: 6px;
 }}
 
 .email-card-top {{
@@ -198,6 +198,126 @@ div[data-testid="stButton"] > button:hover {{
 .style-badge.fallback {{
     background: rgba(148, 163, 184, 0.15);
     color: #94a3b8;
+}}
+
+.commitment-row {{
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-left: 4px solid var(--cat-color, {ACCENT_END});
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+}}
+
+.commitment-check {{
+    color: rgba(255,255,255,0.35);
+    font-size: 1.1rem;
+    line-height: 1.3;
+}}
+
+.commitment-body {{
+    flex: 1;
+}}
+
+.commitment-task {{
+    color: #f5f5f7;
+    font-size: 0.94rem;
+    font-weight: 600;
+}}
+
+.commitment-meta {{
+    color: rgba(255,255,255,0.5);
+    font-size: 0.8rem;
+    margin-top: 2px;
+}}
+
+.commitment-deadline {{
+    color: {ACCENT_END};
+    font-weight: 700;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}}
+
+.commitment-deadline.none {{
+    color: rgba(255,255,255,0.35);
+    font-weight: 500;
+}}
+
+/* Native-widget theme fixes */
+[data-testid="stTextAreaRootElement"] {{
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 10px;
+}}
+
+[data-testid="stTextAreaRootElement"]:focus-within {{
+    border-color: {ACCENT_END};
+}}
+
+[data-testid="stTextAreaRootElement"] textarea {{
+    background: transparent;
+    color: #f5f5f7;
+    font-family: 'Inter', sans-serif;
+}}
+
+[data-testid="stTextAreaRootElement"] textarea::placeholder {{
+    color: rgba(255,255,255,0.35);
+}}
+
+[data-testid="stExpander"] {{
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+}}
+
+[data-testid="stExpander"] summary {{
+    padding: 10px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.75);
+}}
+
+[data-testid="stExpander"] summary:hover {{
+    color: {ACCENT_END};
+}}
+
+[data-testid="stExpanderDetails"] {{
+    padding: 0 20px 16px;
+}}
+
+[data-testid="stSidebar"] {{
+    background: #0f0e17;
+    border-right: 1px solid rgba(255,255,255,0.08);
+}}
+
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] label {{
+    color: rgba(255,255,255,0.85);
+}}
+
+[data-testid="stSidebar"] [data-testid="stSelectbox"] input,
+[data-testid="stSidebar"] [data-testid="stNumberInput"] input {{
+    background: rgba(255,255,255,0.05) !important;
+    border-color: rgba(255,255,255,0.15) !important;
+    color: #f5f5f7 !important;
+}}
+
+[data-testid="stSidebar"] [data-testid="stSelectbox"] div:has(> input),
+[data-testid="stSidebar"] [data-testid="stNumberInputContainer"] {{
+    background: rgba(255,255,255,0.05) !important;
+    border-radius: 8px;
+}}
+
+[data-testid="stSidebar"] [data-testid="stNumberInputStepDown"],
+[data-testid="stSidebar"] [data-testid="stNumberInputStepUp"] {{
+    background: transparent;
+    color: rgba(255,255,255,0.6);
 }}
 </style>
 """

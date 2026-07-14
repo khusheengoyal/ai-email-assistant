@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import streamlit as st
 
 from classify import classify_email
@@ -31,37 +33,48 @@ with st.sidebar:
         key="default_tone",
         help="Used for drafted replies until you have enough sent mail for a personalized style.",
     )
+    st.number_input(
+        "Awaiting Reply after (days)",
+        min_value=0,
+        value=3,
+        step=1,
+        key="days_threshold",
+        help="A sent thread shows up in Awaiting Reply once it's waited this many days without a reply.",
+    )
 
 
-def process_inbox():
-    with st.status("Reading inbox...", expanded=True) as status:
-        service = get_gmail_service()
+def process_inbox(status_placeholder):
+    with status_placeholder.container():
+        with st.status("Reading inbox...", expanded=True) as status:
+            service = get_gmail_service()
 
-        status.update(label="Checking your writing style...")
-        style_result = get_style_profile(service)
-        active_tone = st.session_state.default_tone
-        if style_result["mode"] == "personalized":
-            style_guidance = style_result["profile"]
-        else:
-            style_guidance = get_tone_instruction(active_tone)
+            status.update(label="Checking your writing style...")
+            style_result = get_style_profile(service)
+            active_tone = st.session_state.default_tone
+            if style_result["mode"] == "personalized":
+                style_guidance = style_result["profile"]
+            else:
+                style_guidance = get_tone_instruction(active_tone)
 
-        emails = fetch_unread_emails(service, max_results=20)
-        skipped = [e for e in emails if e["is_bulk_mail"]]
-        real = [e for e in emails if not e["is_bulk_mail"]]
-        status.update(label=f"Read {len(emails)} unread email(s), {len(skipped)} look like bulk mail")
+            emails = fetch_unread_emails(service, max_results=20)
+            skipped = [e for e in emails if e["is_bulk_mail"]]
+            real = [e for e in emails if not e["is_bulk_mail"]]
+            status.update(label=f"Read {len(emails)} unread email(s), {len(skipped)} look like bulk mail")
 
-        status.update(label=f"Prioritizing {len(real)} email(s)...")
-        processed = []
-        for email in real:
-            result = classify_email(email, style_guidance=style_guidance)
-            sender_count = count_from_sender(email["from"]) + 1
-            record_email(email["id"], email["from"], email["subject"], result.get("category", ""))
-            processed.append({**email, "classification": result, "sender_count": sender_count})
+            status.update(label=f"Prioritizing {len(real)} email(s)...")
+            processed = []
+            for email in real:
+                result = classify_email(email, style_guidance=style_guidance)
+                sender_count = count_from_sender(email["from"]) + 1
+                record_email(email["id"], email["from"], email["subject"], result.get("category", ""))
+                processed.append({**email, "classification": result, "sender_count": sender_count})
 
-        status.update(label="Checking threads awaiting reply...")
-        awaiting = find_awaiting_replies(service)
+            status.update(label="Checking threads awaiting reply...")
+            awaiting = find_awaiting_replies(service, days_threshold=st.session_state.days_threshold)
 
-        status.update(label="Done", state="complete")
+            status.update(label="Done", state="complete")
+
+    status_placeholder.empty()
 
     st.session_state.emails = processed
     st.session_state.skipped_count = len(skipped)
@@ -75,8 +88,10 @@ def process_inbox():
 st.markdown('<div class="hero-header">&#10022; Morning Briefing</div>', unsafe_allow_html=True)
 st.markdown('<div class="hero-subtitle">Your inbox, prioritized.</div>', unsafe_allow_html=True)
 
+status_slot = st.empty()
+
 if st.button("Refresh Inbox"):
-    process_inbox()
+    process_inbox(status_slot)
 
 urgent_count = sum(
     1 for e in st.session_state.emails if e["classification"].get("category") == "Urgent"
@@ -86,6 +101,42 @@ needs_reply_count = sum(
 )
 awaiting_count = len(st.session_state.awaiting)
 newsletters_count = st.session_state.skipped_count
+
+
+def collect_commitments(emails):
+    commitments = []
+    for email in emails:
+        classification = email["classification"]
+        if classification.get("error"):
+            continue
+        for item in classification.get("action_items", []):
+            task = item.get("task", "")
+            if not task:
+                continue
+            commitments.append({
+                "task": task,
+                "deadline": item.get("deadline"),
+                "subject": email["subject"],
+                "from": email["from"],
+                "category": classification.get("category", "FYI"),
+            })
+    return commitments
+
+
+def _commitment_sort_key(indexed):
+    index, commitment = indexed
+    deadline = commitment["deadline"]
+    if deadline:
+        try:
+            return (0, datetime.strptime(deadline, "%Y-%m-%d"))
+        except (ValueError, TypeError):
+            return (1, index)
+    return (2, index)
+
+
+commitments = [
+    c for _, c in sorted(enumerate(collect_commitments(st.session_state.emails)), key=_commitment_sort_key)
+]
 
 stats = [
     ("Urgent", urgent_count, CATEGORY_COLORS["Urgent"]),
@@ -165,18 +216,42 @@ def render_email_card(email):
             )
 
 
-def render_awaiting_row(item):
+def render_commitment_row(item):
+    color = CATEGORY_COLORS.get(item["category"], ACCENT_END)
+    if item["deadline"]:
+        deadline_html = f'<div class="commitment-deadline">{item["deadline"]}</div>'
+    else:
+        deadline_html = '<div class="commitment-deadline none">No deadline</div>'
+
     st.markdown(
-        f'<div class="awaiting-row">'
-        f'<div><b>{item["subject"]}</b><br>'
-        f'<span class="email-meta">to {item["to"]}</span></div>'
-        f'<div class="awaiting-days">{item["days_waiting"]}d waiting</div>'
+        f'<div class="commitment-row" style="--cat-color:{color}">'
+        f'<span class="commitment-check">&#9744;</span>'
+        f'<div class="commitment-body">'
+        f'<div class="commitment-task">{item["task"]}</div>'
+        f'<div class="commitment-meta">{item["subject"]} &middot; {item["from"]}</div>'
+        f"</div>"
+        f"{deadline_html}"
         f"</div>",
         unsafe_allow_html=True,
     )
 
 
-inbox_tab, awaiting_tab = st.tabs(["Inbox", f"Awaiting Reply ({awaiting_count})"])
+def render_awaiting_row(item):
+    days_waiting = item["days_waiting"]
+    waiting_label = "waiting since today" if days_waiting == 0 else f"{days_waiting}d waiting"
+    st.markdown(
+        f'<div class="awaiting-row">'
+        f'<div><b>{item["subject"]}</b><br>'
+        f'<span class="email-meta">to {item["to"]}</span></div>'
+        f'<div class="awaiting-days">{waiting_label}</div>'
+        f"</div>",
+        unsafe_allow_html=True,
+    )
+
+
+inbox_tab, commitments_tab, awaiting_tab = st.tabs(
+    ["Inbox", f"Commitments ({len(commitments)})", f"Awaiting Reply ({awaiting_count})"]
+)
 
 with inbox_tab:
     if not st.session_state.processed:
@@ -191,6 +266,15 @@ with inbox_tab:
         )
         for email in sorted_emails:
             render_email_card(email)
+
+with commitments_tab:
+    if not st.session_state.processed:
+        st.info("Click **Refresh Inbox** to gather commitments from your unread mail.")
+    elif not commitments:
+        st.success("No open commitments right now.")
+    else:
+        for item in commitments:
+            render_commitment_row(item)
 
 with awaiting_tab:
     if not st.session_state.processed:

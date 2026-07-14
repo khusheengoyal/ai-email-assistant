@@ -1,4 +1,5 @@
 import json
+from datetime import date
 
 from fallback_tone import DEFAULT_TONE, get_tone_instruction
 from groq_client import get_groq_client
@@ -6,7 +7,7 @@ from groq_client import get_groq_client
 MODEL = "llama-3.3-70b-versatile"
 CLASSIFICATION_TEMPERATURE = 0.2
 
-PROMPT_TEMPLATE = """You are an email triage assistant. Given the email below, respond with ONLY a JSON object (no markdown code fences, no extra commentary) with exactly these fields:
+PROMPT_TEMPLATE = """You are an email triage assistant. Today's date is {today}. Given the email below, respond with ONLY a JSON object (no markdown code fences, no extra commentary) with exactly these fields:
 
 {{
   "category": one of "Urgent", "Needs Reply", "FYI", "Newsletter",
@@ -16,6 +17,8 @@ PROMPT_TEMPLATE = """You are an email triage assistant. Given the email below, r
   "action_items": [{{"task": "...", "deadline": "YYYY-MM-DD or null"}}],
   "suggested_reply": "a draft reply, or empty string if no reply is needed"
 }}
+
+When an action item has a relative deadline ("tomorrow", "next Friday", "in two weeks"), compute the actual calendar date from today's date above and use that YYYY-MM-DD value instead of the relative phrase.
 
 When writing "suggested_reply", follow this style guidance (do not mention it in the reply):
 {style_guidance}
@@ -41,6 +44,7 @@ def _strip_code_fences(text: str) -> str:
 def classify_email(email: dict, style_guidance: str = DEFAULT_STYLE_GUIDANCE) -> dict:
     client = get_groq_client()
     prompt = PROMPT_TEMPLATE.format(
+        today=date.today().strftime("%A, %Y-%m-%d"),
         sender=email["from"],
         subject=email["subject"],
         body=email["body_text"][:6000],
