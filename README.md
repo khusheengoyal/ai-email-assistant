@@ -55,6 +55,7 @@ review instead of a 45-minute slog.
 - [x] Groq classification (category, priority, summary, action items, draft)
 - [x] Writing-style profile from sent mail, with graceful default-tone fallback
 - [x] Awaiting-reply follow-up tracking
+- [x] Commitments tracker — action items aggregated across inbox, sorted by deadline
 - [x] Sender-aware repeat-contact log
 - [x] Streamlit dashboard (stat row, tabs, email cards, awaiting-reply list)
 
