@@ -10,6 +10,24 @@ commitments/deadlines, tracks threads waiting on a reply, and drafts replies
 in your own writing style — so the daily inbox pass becomes a 5-minute
 review instead of a 45-minute slog.
 
+## Screenshots
+
+**Inbox** — unread mail read, classified, and prioritized:
+
+![Inbox tab](assets/screenshots/inbox.png)
+
+**Draft reply** — personalized from the user's own writing style, draft-only:
+
+![Suggested reply expanded](assets/screenshots/draft-reply.png)
+
+**Commitments** — action items extracted across all classified mail, sorted by deadline:
+
+![Commitments tab](assets/screenshots/commitments.png)
+
+**Awaiting Reply** — sent threads waiting on a response:
+
+![Awaiting Reply tab](assets/screenshots/awaiting-reply.png)
+
 ## Privacy & safety (this is a feature, not a footnote)
 
 - **Draft-only, structurally.** The OAuth token is issued with only
