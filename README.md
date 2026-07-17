@@ -77,6 +77,10 @@ Python, official Gmail API client (`google-api-python-client`), Groq,
 5. (Optional) Edit `filter_rules.json` to customize the pre-filter — see
    [Pre-filter configuration](#pre-filter-configuration) below. If you skip
    this, sensible defaults are used automatically.
+6. Copy `.env.example` to `.env` and set `GROQ_API_KEY` to your
+   [Groq API key](https://console.groq.com/keys). Required — classification
+   has no fallback without it.
+7. `.venv\Scripts\streamlit run app.py` — launches the dashboard.
 
 ## Pre-filter configuration
 
